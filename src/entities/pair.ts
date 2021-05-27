@@ -15,7 +15,7 @@ import {
   FIVE,
   ChainId,
   _9975,
-  _10000
+  _10000,
 } from '../constants'
 import { sqrt, parseBigintIsh } from '../utils'
 import { InsufficientReservesError, InsufficientInputAmountError } from '../errors'
@@ -39,8 +39,8 @@ export class Pair {
             FACTORY_ADDRESS,
             keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]),
             INIT_CODE_HASH
-          )
-        }
+          ),
+        },
       }
     }
 
@@ -120,14 +120,14 @@ export class Pair {
     return token.equals(this.token0) ? this.reserve0 : this.reserve1
   }
 
-  public getOutputAmount(inputAmount: TokenAmount): [TokenAmount, Pair] {
+  public getOutputAmount(inputAmount: TokenAmount, tradingFeeBasisPoint: BigintIsh): [TokenAmount, Pair] {
     invariant(this.involvesToken(inputAmount.token), 'TOKEN')
     if (JSBI.equal(this.reserve0.raw, ZERO) || JSBI.equal(this.reserve1.raw, ZERO)) {
       throw new InsufficientReservesError()
     }
     const inputReserve = this.reserveOf(inputAmount.token)
     const outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0)
-    const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975)
+    const inputAmountWithFee = JSBI.multiply(inputAmount.raw, JSBI.BigInt(tradingFeeBasisPoint as BigInt))
     const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
     const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
     const outputAmount = new TokenAmount(
@@ -140,7 +140,7 @@ export class Pair {
     return [outputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))]
   }
 
-  public getInputAmount(outputAmount: TokenAmount): [TokenAmount, Pair] {
+  public getInputAmount(outputAmount: TokenAmount, tradingFeeBasisPoint: BigintIsh): [TokenAmount, Pair] {
     invariant(this.involvesToken(outputAmount.token), 'TOKEN')
     if (
       JSBI.equal(this.reserve0.raw, ZERO) ||
@@ -153,7 +153,10 @@ export class Pair {
     const outputReserve = this.reserveOf(outputAmount.token)
     const inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
     const numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _10000)
-    const denominator = JSBI.multiply(JSBI.subtract(outputReserve.raw, outputAmount.raw), _9975)
+    const denominator = JSBI.multiply(
+      JSBI.subtract(outputReserve.raw, outputAmount.raw),
+      JSBI.BigInt(tradingFeeBasisPoint as BigInt)
+    )
     const inputAmount = new TokenAmount(
       outputAmount.token.equals(this.token0) ? this.token1 : this.token0,
       JSBI.add(JSBI.divide(numerator, denominator), ONE)
