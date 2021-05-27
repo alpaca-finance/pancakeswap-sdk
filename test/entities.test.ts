@@ -1,5 +1,5 @@
 import invariant from 'tiny-invariant'
-import { ChainId, WETH as _WETH, TradeType, Rounding, Token, TokenAmount, Pair, Route, Trade, JSBI } from '../src'
+import { ChainId, WETH as _WETH, TradeType, Rounding, Token, TokenAmount, Pair, Route, Trade } from '../src'
 import { _9975 } from '../src/constants'
 
 const ADDRESSES = [
@@ -131,28 +131,23 @@ describe('entities', () => {
         })
 
         it('TradeType.EXACT_OUTPUT', () => {
-          const outputAmount = new TokenAmount(WETH, '1662497915624478906')
-          // const expectedInputAmount = new TokenAmount(tokens[1], decimalize(1, tokens[1].decimals))
-          const expectedInputAmount = new TokenAmount(tokens[1], '999498746867167920')
+          const outputAmount = new TokenAmount(WETH, '1663192997082117548')
+          const expectedInputAmount = new TokenAmount(tokens[1], decimalize(1, tokens[1].decimals))
           const trade = new Trade(route, outputAmount, TradeType.EXACT_OUTPUT, _9975)
           expect(trade.route).toEqual(route)
           expect(trade.tradeType).toEqual(TradeType.EXACT_OUTPUT)
           expect(trade.outputAmount).toEqual(outputAmount)
-
-          console.log('trade.inputAmount toString', trade.inputAmount.raw.toString())
-          console.log('trade.inputAmount tonumber', JSBI.toNumber(trade.inputAmount.raw))
-          console.log('decimalize(1, tokens[1].decimals) toString', decimalize(1, tokens[1].decimals).toString())
           expect(trade.inputAmount).toEqual(expectedInputAmount)
 
-          expect(trade.executionPrice.toSignificant(18)).toEqual('1.66249791562447891')
-          expect(trade.executionPrice.invert().toSignificant(18)).toEqual('0.601504513540621866')
+          expect(trade.executionPrice.toSignificant(18)).toEqual('1.66319299708211755')
+          expect(trade.executionPrice.invert().toSignificant(18)).toEqual('0.601253132832080201')
           expect(trade.executionPrice.quote(expectedInputAmount)).toEqual(outputAmount)
           expect(trade.executionPrice.invert().quote(outputAmount)).toEqual(expectedInputAmount)
 
-          expect(trade.nextMidPrice.toSignificant(18)).toEqual('1.38958368072925352')
-          expect(trade.nextMidPrice.invert().toSignificant(18)).toEqual('0.71964')
+          expect(trade.nextMidPrice.toSignificant(18)).toEqual('1.38946783381964708')
+          expect(trade.nextMidPrice.invert().toSignificant(18)).toEqual('0.7197')
 
-          expect(trade.priceImpact.toSignificant(18)).toEqual('16.8751042187760547')
+          expect(trade.priceImpact.toSignificant(18)).toEqual('16.8403501458941226')
         })
 
         it('minimum TradeType.EXACT_INPUT', () => {
