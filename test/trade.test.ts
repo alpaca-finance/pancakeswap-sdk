@@ -12,7 +12,7 @@ import {
   TradeType,
   WETH
 } from '../src'
-import { _9975 } from '../src/constants'
+import { _9975, BigintIsh } from '../src/constants'
 
 describe('Trade', () => {
   const token0 = new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000001', 18, 't0')
@@ -70,6 +70,28 @@ describe('Trade', () => {
       new TokenAmount(token0, JSBI.BigInt(100)),
       TradeType.EXACT_INPUT,
       _9975
+    )
+    expect(trade.inputAmount.currency).toEqual(token0)
+    expect(trade.outputAmount.currency).toEqual(ETHER)
+  })
+
+  it('can be constructed with trading fee datatype string', () => {
+    const trade = new Trade(
+      new Route([pair_weth_0], token0, ETHER),
+      new TokenAmount(token0, JSBI.BigInt(100)),
+      TradeType.EXACT_INPUT,
+      _9975.toString()
+    )
+    expect(trade.inputAmount.currency).toEqual(token0)
+    expect(trade.outputAmount.currency).toEqual(ETHER)
+  })
+
+  it('can be constructed with trading fee datatype bigint', () => {
+    const trade = new Trade(
+      new Route([pair_weth_0], token0, ETHER),
+      new TokenAmount(token0, JSBI.BigInt(100)),
+      TradeType.EXACT_INPUT,
+      (_9975 as BigintIsh) as bigint
     )
     expect(trade.inputAmount.currency).toEqual(token0)
     expect(trade.outputAmount.currency).toEqual(ETHER)
