@@ -1,5 +1,4 @@
 import invariant from 'tiny-invariant'
-import warning from 'tiny-warning'
 import JSBI from 'jsbi'
 import { getAddress } from '@ethersproject/address'
 
